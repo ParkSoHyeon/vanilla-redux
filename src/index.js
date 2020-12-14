@@ -7,14 +7,29 @@ const ul = document.querySelector('ul');
 const ADD_TODO = 'ADD_TODO';
 const DELETE_TODO = 'DELETE_TODO';
 
+const addTodo = (text) => {
+    return {
+        type: ADD_TODO,
+        text
+    }
+};
+
+const deleteTodo = (id) => {
+    return {
+        type: DELETE_TODO,
+        id
+    }
+};
+
 const reducer = (state = [], action) => {
-    console.log(action);
     switch (action.type) {
         case ADD_TODO:
-            return [...state, { text: action.text }];
+            const newToDoObj = { text: action.text, id: Date.now() };
+            return [newToDoObj, ...state];
             break;
         case DELETE_TODO:
-            return [];
+            const cleaned = state.filter(toDo => toDo.id !== parseInt(action.id));
+            return cleaned;
             break;
         default:
             return state;
@@ -23,19 +38,40 @@ const reducer = (state = [], action) => {
 
 const store = createStore(reducer);
 
-store.subscribe(() => console.log(store.getState()));
+store.subscribe(() => paintTodos());
 
-const createToDo = toDo => {
-    const li = document.createElement('li');
-    li.innerText = toDo;
-    ul.appendChild(li);
+const paintTodos = () => {
+    const toDos = store.getState();
+
+    ul.innerText = '';
+
+    toDos.forEach(toDo => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.innerText = 'DEL';
+        btn.addEventListener('click', dispatchDeleteTodo);
+        li.id = toDo.id;
+        li.innerText = toDo.text;
+
+        li.appendChild(btn);
+        ul.appendChild(li);
+    });
+}
+
+const dispatchAddTodo = text => {
+    store.dispatch(addTodo(text));
+}
+
+const dispatchDeleteTodo = e => {
+    const id = parseInt(e.target.parentNode.id);
+    store.dispatch(deleteTodo(id));
 }
 
 const onSubmit = e => {
     e.preventDefault();
     const toDo = input.value;
     input.value = '';
-    store.dispatch({ type: ADD_TODO, text: toDo });
+    dispatchAddTodo(toDo);
 }
 
 form.addEventListener('submit', onSubmit);
