@@ -7,8 +7,9 @@ function Todo({ text, onClickBtn, id }) {
     return (
       <li>
           <Link to={`/${id}`}>
-              {text}<button onClick={onClickBtn}>DEL</button>
+              {text}
           </Link>
+          <button onClick={onClickBtn}>DEL</button>
       </li>
     );
 }
